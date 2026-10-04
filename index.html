@@ -574,7 +574,7 @@ function renderHome(){
     return '<button class="profile" data-act="pick" data-id="'+k.id+'" style="--kid:'+k.color+';--kid-soft:color-mix(in srgb, '+k.color+' 18%, var(--surface));border-color:'+k.color+'"><span class="pm" aria-hidden="true">'+mascotOf(k,totalDone(p))+'</span><span class="pn">'+esc(k.name)+'</span><span class="ps">⭐ '+pts+' ימים השבוע</span></button>';}).join('');
   var rems=cfg.kids.map(function(k){var r=reminderFor(k);return r?{k:k,r:r}:null;}).filter(Boolean);
   var remHtml='';if(rems.length){var byT={};rems.forEach(function(x){(byT[x.r.text]=byT[x.r.text]||[]).push(x.k.name);});for(var t in byT)remHtml+='<div class="remind" role="status">'+t+' · '+byT[t].map(esc).join(', ')+'</div>';}
-  $app.innerHTML=headerBar('')+remHtml+'<h2>מי משתמש עכשיו?</h2><div class="profiles">'+cards+'</div><button class="parentlink" data-act="pick-parent">🔒 אזור הורים</button>';
+  $app.innerHTML=headerBar('')+remHtml+'<h2>מי משתמש עכשיו?</h2><div class="profiles">'+cards+'</div>'+(isInstalled()?'':'<button class="parentlink" data-act="pick-parent">🔒 אזור הורים</button>');
 }
 
 function renderPin(){
@@ -676,6 +676,8 @@ function tick(){if(!tm)return;var n=Date.now();if(tm.run){tm.left-=(n-tm.last)/1
     document.getElementById('tbtns').innerHTML='<button class="btn good" data-act="tdone">✓ סיימתי! לסמן</button><button class="btn" data-act="close">סגירה</button>';tt.textContent='נגמר!';}}
 function stopTimer(){if(tm){clearInterval(tm.iv);tm=null;}if(wake){try{wake.release();}catch(e){}wake=null;}}
 
+/* app instalado na tela inicial = sem acesso aos pais */
+function isInstalled(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
 /* ---------- parent ---------- */
 function renderParent(){
   var tab=view.tab||'tasks';
@@ -762,7 +764,7 @@ document.addEventListener('click',function(ev){
   switch(a){
     case 'setup': saveCfg(buildDefault()); view={screen:'home'}; render(); break;
     case 'pick': view={screen:'pin',pinFor:id,pin:''}; render(); break;
-    case 'pick-parent': view={screen:'pin',pinFor:'parent',pin:''}; render(); break;
+    case 'pick-parent': if(isInstalled())break; view={screen:'pin',pinFor:'parent',pin:''}; render(); break;
     case 'key': onKey(b.dataset.k); break;
     case 'home': stopTimer(); view={screen:'home'}; render(); break;
     case 'tmv': mutateDay(function(l){var s=sortTasks(l),i=s.findIndex(function(x){return x.id===id;}),j=i+(+b.dataset.dir);if(i<0||j<0||j>=s.length||s[j].p!==s[i].p)return l;var a1=l.indexOf(s[i]),a2=l.indexOf(s[j]),tmp=l[a1];l[a1]=l[a2];l[a2]=tmp;return l;});render(); break;
