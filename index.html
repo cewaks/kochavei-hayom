@@ -369,9 +369,10 @@ if (typeof module !== 'undefined') module.exports = { buildDefault: buildDefault
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
   // Join link: #j=<base64 {c:config, f:familyId}>
+  if (location.hash === '#pais') { try{localStorage.removeItem('kh-kid');}catch(e){} try{history.replaceState(null,'',location.pathname+location.search);}catch(e){} }
   var m = location.hash.match(/^#j=(.+)$/);
   if (m) {
-    try { var v = JSON.parse(b64dec(m[1])); if (v && v.c && v.c.apiKey && v.f) { store(v); window.KH_JOINED = true; } } catch(e){}
+    try { var v = JSON.parse(b64dec(m[1])); if (v && v.c && v.c.apiKey && v.f) { store(v); window.KH_JOINED = true; try{localStorage.setItem('kh-kid','1');}catch(e){} } } catch(e){}
     try { history.replaceState(null, '', location.pathname + location.search); } catch(e){}
   }
 
@@ -677,7 +678,7 @@ function tick(){if(!tm)return;var n=Date.now();if(tm.run){tm.left-=(n-tm.last)/1
 function stopTimer(){if(tm){clearInterval(tm.iv);tm=null;}if(wake){try{wake.release();}catch(e){}wake=null;}}
 
 /* app instalado na tela inicial = sem acesso aos pais */
-function isInstalled(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
+function isInstalled(){try{if(localStorage.getItem('kh-kid')==='1')return true;}catch(e){}try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
 /* ---------- parent ---------- */
 function renderParent(){
   var tab=view.tab||'tasks';
